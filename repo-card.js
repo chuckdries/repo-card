@@ -1,12 +1,4 @@
 window.addEventListener('DOMContentLoaded', async function() {
-  var resp;
-
-  resp = await fetch('https://api.github.com/emojis');
-  var emojis = await resp.json();
-
-  resp = await fetch('https://raw.githubusercontent.com/ozh/github-colors/master/colors.json');
-  var colors = await resp.json();
-
   var styleTag = document.querySelectorAll('#repo-card-style')[0];
   if (!styleTag) {
     styleTag = document.createElement('style');
@@ -36,10 +28,21 @@ window.addEventListener('DOMContentLoaded', async function() {
     headTag.appendChild(styleTag);
   }
 
-  document.querySelectorAll('.repo-card').forEach(async function(el) {
+  var repoCards = document.querySelectorAll('.repo-card');
+  
+  repoCards.forEach(async function(el) {
+    el.innerHTML = `<div class='repo-card-inner'></div>`
+  })
+
+  var [emojis, colors] = await Promise.all([
+    fetch('https://api.github.com/emojis').then(resp => resp.json()),
+    fetch('https://raw.githubusercontent.com/ozh/github-colors/master/colors.json').then(resp => resp.json())
+  ])
+
+  repoCards.forEach(async function(el) {
     var name = el.getAttribute('data-repo');
 
-    resp = await fetch('https://api.github.com/repos/' + name);
+    var resp = await fetch('https://api.github.com/repos/' + name);
     var data = await resp.json();
 
     data.description = data.description.replace(/:\w+:/g, function(match) {
